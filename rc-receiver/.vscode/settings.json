@@ -1,0 +1,6 @@
+{
+    "terminal.integrated.env.linux": {
+        "PATH": "/home/dirrgang/.platformio/penv/bin:/home/dirrgang/.platformio/penv:/home/dirrgang/.vscode-server/bin/9df03c6d6ce97c6645c5846f6dfa2a6a7d276515/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/mnt/c/program files/adoptopenjdk/jre-8.0.222.10-hotspot/bin:/mnt/c/program files/adoptopenjdk/jre-11.0.4.11-hotspot/bin:/mnt/c/windows/system32:/mnt/c/windows:/mnt/c/windows/system32/wbem:/mnt/c/windows/system32/windowspowershell/v1.0/:/mnt/c/windows/system32/openssh/:/mnt/c/program files/microsoft vs code/bin:/mnt/c/program files/nvidia corporation/nvidia nvdlisr:/mnt/c/program files/calibre2/:/mnt/c/Program Files/Microsoft VS Code/bin:/mnt/c/Users/me/AppData/Local/Microsoft/WindowsApps:/mnt/c/Users/me/AppData/Local/Programs/MiKTeX 2.9/miktex/bin/x64/",
+        "PLATFORMIO_CALLER": "vscode"
+    }
+}
