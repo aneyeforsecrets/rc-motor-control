@@ -177,6 +177,40 @@ void motorGo(Motor motor, MotorMode mode, uint8_t speed)
   return;
 }
 
+void resetData()
+{
+  //TODO
+}
+
+void receiveData(int *joyX, int *joyY)
+{
+  uint8_t buf[RH_ASK_MAX_MESSAGE_LEN];
+  uint8_t buflen = sizeof(buf);
+  static unsigned long lastReceiveTime;
+  static unsigned long currentTime;
+
+  if (driver.recv(buf, &buflen)) // Non-blocking
+  {
+    digitalWrite(kStatPin, HIGH);
+    RadioMsg msg;
+    memcpy(&msg, buf, sizeof(RadioMsg)); // Fill the structure with the incoming data.
+                                         // Message with a good checksum received, dump it.
+    *joyX = msg.joyX;
+    *joyY = msg.joyY;
+    lastReceiveTime = millis(); // At this moment we have received the data
+  }
+  // Check whether we keep receving data, or we have a connection between the two modules
+
+  currentTime = millis();
+
+  if (currentTime - lastReceiveTime > 1000)
+  {              // If current time is more then 1 second since we have recived the last data, that means we have lost connection
+    resetData(); // If connection is lost, reset the data. It prevents unwanted behavior, for example if a drone has a throttle up and we lose connection, it can keep flying unless we reset the values
+  }
+
+  digitalWrite(kStatPin, LOW);
+}
+
 void setup()
 {
 
@@ -212,40 +246,25 @@ void loop()
   String line0;
   String line1;
 
-  float motorCurrent;
   int state = 0;
 
   while (state == 0)
   {
-    uint8_t buf[RH_ASK_MAX_MESSAGE_LEN];
-    uint8_t buflen = sizeof(buf);
+    receiveData(&joyX, &joyY);
 
-    if (driver.recv(buf, &buflen)) // Non-blocking
-    {
-      digitalWrite(kStatPin, HIGH);
-      RadioMsg msg;
-      memcpy(&msg, buf, sizeof(RadioMsg)); // Fill the structure with the incoming data.
-                                           // Message with a good checksum received, dump it.
-      joyX = msg.joyX;
-      joyY = msg.joyY;
-    }
-
-    digitalWrite(kStatPin, LOW);
-
-    speed = map(abs(joyX - 511),0,511,0,255);
+    speed = map(abs(joyX - 511), 0, 511, 0, 255);
 
     if (joyX - 511 < -deadZoneX)
     {
-      mode = CCW;
+      motorGo(MOTOR_A, CCW, speed);
     }
     else if (joyX - 511 > deadZoneX)
     {
-      mode = CW;
+      motorGo(MOTOR_A, CW, speed);
     }
     else
     {
-      mode = BRAKEVCC;
-      speed = 0;
+      motorGo(MOTOR_A, BRAKEVCC, 0);
     }
 
     if (time % 200 == 0)
@@ -255,24 +274,13 @@ void loop()
       line0 = String(line0 + "Speed: " + String(speed));
       line1 = String(line1 + "JoyX: " + String(joyX));
       lcd.clear();
-      
+
       lcd.print(line0);
       lcd.setCursor(0, 1);
       lcd.print(line1);
       time = 0;
     }
 
-    motorGo(MOTOR_A, mode, speed);
-
-    // if ((analogRead(kCspPin[0]) < kCurrentSensingThreshhold) && (analogRead(kCspPin[1]) < kCurrentSensingThreshhold))
-    // {
-    //   digitalWrite(kStatPin, HIGH);
-    // }
-    // else
-    // {
-    //   digitalWrite(kStatPin, LOW);
-    //   break;
-    // }
     time = time + 10;
     delay(10);
   }
